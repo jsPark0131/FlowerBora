@@ -36,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     Button picture;
     int imageSize = 224;
 
+    Button btn;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,39 +48,16 @@ public class MainActivity extends AppCompatActivity {
         imageView = findViewById(R.id.imageView);
         picture = findViewById(R.id.button);
 
-        /*String ret = "";
-        try{
-            InputStream in = getResources().openRawResource(R.raw.labels);
-
-            InputStreamReader inputStreamReader = new InputStreamReader(in);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            String receiveString = "";
-            StringBuilder stringBuilder = new StringBuilder();
-
-            while((receiveString = bufferedReader.readLine())!=null){
-                stringBuilder.append("\n").append(receiveString);
+        btn=findViewById(R.id.btn_next);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, CameraActivity.class);
+                startActivity(intent);
+                finish();
             }
-            inputStreamReader.close();
-            ret=stringBuilder.toString();
+        });
 
-            Log.e("###", ret[0]);
-            byte[] b = new byte[in.available()];
-            in.read(b);
-            String s = new String(b);
-            Log.e("###", s);
-
-            String[] strToStrArray = s.split("\n");
-            Log.e("###", strToStrArray[0]);
-
-            String[] class2 = {};
-            for(int i=0;i<strToStrArray.length;i++){
-                class2[i]=strToStrArray[i].substring(2);
-            }
-            Log.e("###", class2[2]);
-        }
-        catch (IOException e){
-            e.printStackTrace();
-        }*/
         picture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

@@ -46,17 +46,17 @@
         android:id="@+id/result"
         android:layout_below="@+id/classified"
         />
+
     <TextView
+        android:id="@+id/confidencesText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/confidencesText"
-        android:text="Confidences:"
-        android:textStyle="bold"
-        android:textSize="20sp"
-        android:layout_centerHorizontal="true"
         android:layout_below="@+id/result"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="30sp"
-        />
+        android:text="Confidences:"
+        android:textSize="20sp"
+        android:textStyle="bold" />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -67,6 +67,11 @@
         android:id="@+id/confidence"
         android:layout_below="@+id/confidencesText"
         />
+    
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_next"/>
 
 
 
