@@ -1,5 +1,6 @@
 package com.example.flowerbora;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -7,6 +8,10 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
+import android.hardware.Camera;
 import android.media.ThumbnailUtils;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,6 +21,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.flowerbora.ml.Model;
 
@@ -31,46 +37,80 @@ import java.nio.ByteOrder;
 
 public class MainActivity extends AppCompatActivity {
 
-    TextView result, confidence;
+    CameraSurfaceView surfaceView;
     ImageView imageView;
-    Button picture;
     int imageSize = 224;
-
-    Button btn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        result = findViewById(R.id.result);
-        confidence = findViewById(R.id.confidence);
+        surfaceView = findViewById(R.id.surfaceView);
         imageView = findViewById(R.id.imageView);
-        picture = findViewById(R.id.button);
 
-        btn=findViewById(R.id.btn_next);
-        btn.setOnClickListener(new View.OnClickListener() {
+        Button button = findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, CameraActivity.class);
-                startActivity(intent);
-                finish();
+                //카메라 사진 캡쳐
+                capture();
             }
         });
+    }
 
-        picture.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Launch camera if we have permission
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                        startActivityForResult(cameraIntent, 1);
-                    } else {
-                        //Request camera permission if we don't have it.
-                        requestPermissions(new String[]{Manifest.permission.CAMERA}, 100);
+    @Override   //카메라 권한 함수
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode){
+            case 101:
+                if(grantResults.length > 0){
+                    if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                        Toast.makeText(this, "카메라 권한 사용자가 승인함",Toast.LENGTH_LONG).show();
+                    }
+                    else if(grantResults[0] == PackageManager.PERMISSION_DENIED){
+                        Toast.makeText(this, "카메라 권한 사용자가 허용하지 않음.",Toast.LENGTH_LONG).show();
+                    }
+                    else{
+                        Toast.makeText(this, "수신권한 부여받지 못함.",Toast.LENGTH_LONG).show();
                     }
                 }
+        }
+    }
+
+
+    public void capture(){
+        surfaceView.capture(new Camera.PictureCallback() {
+            @Override
+            public void onPictureTaken(byte[] data, Camera camera) {
+                //bytearray 형식으로 전달
+                //이걸이용해서 이미지뷰로 보여주거나 파일로 저장
+
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                //options.inSampleSize = 8; // 1/8사이즈로 보여주기
+
+                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length); //data 어레이 안에 있는 데이터 불러와서 비트맵에 저장
+
+                // 회전되어 나오는 이미지를 바로 돌려줌
+                int width = bitmap.getWidth();
+                int height = bitmap.getHeight();
+                int newWidth = 200;
+                int newHeight = 200;
+                float scaleWidth = ((float) newWidth) / width;
+                float scaleHeight = ((float) newHeight) / height;
+                Matrix matrix = new Matrix();
+                matrix.postScale(scaleWidth, scaleHeight);
+                matrix.postRotate(90);
+
+                Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0,0,width,height,matrix,true);
+                imageView.setImageDrawable(new BitmapDrawable(resizedBitmap));//이미지뷰에 사진 보여주기
+
+                int dimension = Math.min(resizedBitmap.getWidth(), resizedBitmap.getHeight());
+                resizedBitmap = ThumbnailUtils.extractThumbnail(resizedBitmap, dimension, dimension);
+                resizedBitmap = Bitmap.createScaledBitmap(resizedBitmap, imageSize, imageSize, false);
+                classifyImage(resizedBitmap);
+
+                camera.startPreview();
             }
         });
     }
@@ -80,7 +120,8 @@ public class MainActivity extends AppCompatActivity {
             Model model = Model.newInstance(getApplicationContext());
 
             // Creates inputs for reference.
-            TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{1, 224, 224, 3}, DataType.FLOAT32); ByteBuffer byteBuffer = ByteBuffer.allocateDirect(4 * imageSize * imageSize * 3);
+            TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{1, 224, 224, 3}, DataType.FLOAT32);
+            ByteBuffer byteBuffer = ByteBuffer.allocateDirect(4 * imageSize * imageSize * 3);
             byteBuffer.order(ByteOrder.nativeOrder());
 
             // get 1D array of 224 * 224 pixels in image
@@ -104,8 +145,8 @@ public class MainActivity extends AppCompatActivity {
             Model.Outputs outputs = model.process(inputFeature0);
             TensorBuffer outputFeature0 = outputs.getOutputFeature0AsTensorBuffer();
 
+            // 정확성이 가장 높은 것을 도출
             float[] confidences = outputFeature0.getFloatArray();
-            // find the index of the class with the biggest confidence.
             int maxPos = 0;
             float maxConfidence = 0;
             for(int i = 0; i < confidences.length; i++){
@@ -115,36 +156,16 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            String[] classes = {"벚꽃", "개나리", "데이지", "민들레", "장미", "튤립", "해바라기"};
-            result.setText(classes[maxPos]);
-
-            String s = "";
-            for(int i = 0; i < classes.length; i++){
-                s += String.format("%s: %.1f%%\n", classes[i], confidences[i] * 100);
-            }
-            confidence.setText(s);
-
+            Intent intent = new Intent(MainActivity.this, ResultActivity.class);
+            intent.putExtra("confidence", confidences);
+            //intent.putExtra("image", image);
 
             // Releases model resources if no longer used.
             model.close();
+            startActivity(intent);
         } catch (IOException e) {
             // TODO Handle the exception
         }
 
-    }
-
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == 1 && resultCode == RESULT_OK) {
-            Bitmap image = (Bitmap) data.getExtras().get("data");
-            int dimension = Math.min(image.getWidth(), image.getHeight());
-            image = ThumbnailUtils.extractThumbnail(image, dimension, dimension);
-            imageView.setImageBitmap(image);
-
-            image = Bitmap.createScaledBitmap(image, imageSize, imageSize, false);
-            classifyImage(image);
-        }
-        super.onActivityResult(requestCode, resultCode, data);
     }
 }

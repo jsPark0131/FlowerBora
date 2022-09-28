@@ -3,6 +3,7 @@ package com.example.flowerbora;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -67,7 +68,9 @@ public class CameraActivity extends AppCompatActivity {
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inSampleSize = 8; // 1/8사이즈로 보여주기
                 Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length); //data 어레이 안에 있는 데이터 불러와서 비트맵에 저장
-
+                Intent intent = new Intent(CameraActivity.this, ResultActivity.class);
+                intent.putExtra("사진", bitmap);
+                startActivity(intent);
 
                 int width = bitmap.getWidth();
                 int height = bitmap.getHeight();
