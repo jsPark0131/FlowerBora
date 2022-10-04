@@ -34,11 +34,11 @@ public class ResultActivity extends AppCompatActivity {
         imageView = findViewById(R.id.imageView);
 
         Intent intent = getIntent();
-        float[] confidences=intent.getFloatArrayExtra("confidence");
+        float[] confidences = intent.getFloatArrayExtra("confidence");
         int maxPos = 0;
         float maxConfidence = 0;
-        for(int i = 0; i < confidences.length; i++){
-            if(confidences[i] > maxConfidence){
+        for (int i = 0; i < confidences.length; i++) {
+            if (confidences[i] > maxConfidence) {
                 maxConfidence = confidences[i];
                 maxPos = i;
             }
@@ -46,10 +46,9 @@ public class ResultActivity extends AppCompatActivity {
         String[] classes = {"벚꽃", "개나리", "데이지", "민들레", "장미", "튤립", "해바라기"};
         result.setText(classes[maxPos]);
         String s = "";
-        for(int i = 0; i < classes.length; i++){
+        for (int i = 0; i < classes.length; i++) {
             s += String.format("%s: %.1f%%\n", classes[i], confidences[i] * 100);
         }
         confidence.setText(s);
-
     }
 }

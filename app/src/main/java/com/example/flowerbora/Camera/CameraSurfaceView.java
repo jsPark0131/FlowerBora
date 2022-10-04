@@ -1,4 +1,4 @@
-package com.example.flowerbora;
+package com.example.flowerbora.Camera;
 
 import android.content.Context;
 import android.hardware.Camera;
@@ -11,17 +11,18 @@ import androidx.annotation.NonNull;
 public class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     SurfaceHolder holder;
     Camera camera = null;
-    public CameraSurfaceView(Context context){
+
+    public CameraSurfaceView(Context context) {
         super(context);
         init(context);
     }
 
-    public CameraSurfaceView(Context context, AttributeSet attrs){
+    public CameraSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context);
     }
 
-    public void init(Context context){
+    public void init(Context context) {
         holder = getHolder();
         holder.addCallback(this);
     }
@@ -29,9 +30,9 @@ public class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Call
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder surfaceHolder) {
         camera = Camera.open();
-        try{
+        try {
             camera.setPreviewDisplay(holder);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -48,15 +49,14 @@ public class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Call
     public void surfaceDestroyed(@NonNull SurfaceHolder surfaceHolder) {
         camera.stopPreview();
         camera.release();
-        camera=null;
+        camera = null;
     }
 
-    public boolean capture(Camera.PictureCallback callback){
-        if(camera != null){
-            camera.takePicture(null,null,callback);
+    public boolean capture(Camera.PictureCallback callback) {
+        if (camera != null) {
+            camera.takePicture(null, null, callback);
             return true;
-        }
-        else{
+        } else {
             return false;
         }
     }

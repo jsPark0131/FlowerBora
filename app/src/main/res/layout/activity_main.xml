@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".MainActivity">
 
     <FrameLayout
         android:layout_width="300dp"
@@ -13,10 +13,10 @@
         android:layout_gravity="center"
         android:layout_margin="20dp">
 
-        <com.example.flowerbora.CameraSurfaceView
+        <com.example.flowerbora.Camera.CameraSurfaceView
+            android:id="@+id/surfaceView"
             android:layout_width="300dp"
-            android:layout_height="300dp"
-            android:id="@+id/surfaceView"/>
+            android:layout_height="300dp" />
 
 
     </FrameLayout>
@@ -25,11 +25,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="사진찍기" />
+
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/button"
-            android:text="사진찍기"/>
+            android:id="@+id/map"
+            android:text="지도"/>
     </LinearLayout>
 
     <ImageView
