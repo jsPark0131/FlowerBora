@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "164888084316",
+    "project_id": "flowerbora-90ccf",
+    "storage_bucket": "flowerbora-90ccf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:164888084316:android:9e52d8ba00c7da855dcb99",
+        "android_client_info": {
+          "package_name": "com.example.flowerbora"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "164888084316-83tpro9g79lfhi5qlg6lq7ha034ra6ni.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.flowerbora",
+            "certificate_hash": "5f71f8d77310c39a20ea6aeeac14643d0c4ca54a"
+          }
+        },
+        {
+          "client_id": "164888084316-fb87apmgk9ce9qfq7eme53dlecnj1act.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBS_J-5ZiI89H9_pCq-PBNSsNcykloCbDQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "164888084316-fb87apmgk9ce9qfq7eme53dlecnj1act.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

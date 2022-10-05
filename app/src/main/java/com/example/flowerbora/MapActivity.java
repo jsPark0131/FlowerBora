@@ -142,32 +142,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         });
     }
 
-    LocationCallback locationCallback = new LocationCallback() {
-        @Override
-        public void onLocationResult(LocationResult locationResult) {
-            super.onLocationResult(locationResult);
-
-            List<Location> locationList = locationResult.getLocations();
-
-            if (locationList.size() > 0) {
-                location = locationList.get(locationList.size() - 1);
-                // location = locationList.get(0)
-
-                currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
-
-                String markerTitle = getCurrentAddress(currentPosition);
-                String markerSnippet = "위도:" + String.valueOf(location.getLatitude()) + "경도:" + String.valueOf(location.getLongitude());
-
-                Log.e("###", markerSnippet);
-
-                // 현재 위치에 마커 생성하고 이동
-                //setCurrentLocation(location, markerTitle, markerSnippet);
-
-                mCurrentLocation = location;
-            }
-        }
-    };
-
     private void startLocationUpdates() {
         if (!checkLocationServiceStatus()) {
             Log.e("###", "startLocationUpdates : call showDialogForLocationServiceSetting");
@@ -181,7 +155,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
 
             Log.e("###", "startLocationUpdates : call mFusedLocationClient.requestLocationUpdates");
-            mFusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
 
             if (checkPermission())
                 mMap.setMyLocationEnabled(true);
@@ -194,7 +167,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         if (checkPermission()) {
             Log.e("###", "1. onStart : call mFusedLocationClient.requestLocationUpdates");
-            mFusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
 
             if (mMap != null)
                 mMap.setMyLocationEnabled(true);
@@ -207,7 +179,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         if (mFusedLocationClient != null) {
             Log.e("###", "onStop : call stopLocationUpdates");
-            mFusedLocationClient.removeLocationUpdates(locationCallback);
         }
     }
 

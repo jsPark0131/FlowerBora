@@ -58,6 +58,15 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        Button upload = findViewById(R.id.btn_upload);
+        upload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, UpLoadActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override   //카메라 권한 함수
