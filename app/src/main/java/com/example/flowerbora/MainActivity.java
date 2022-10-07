@@ -67,6 +67,15 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        Button list = findViewById(R.id.btn_list);
+        list.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, FlowerListActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override   //카메라 권한 함수
