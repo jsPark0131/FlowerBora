@@ -16,8 +16,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.flowerbora.Class.Flower;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -31,43 +33,30 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URI;
 
-public class UpLoadActivity extends AppCompatActivity {
+public class UpLoadActivity extends AppCompatActivity implements View.OnClickListener {
     private final int GALLERY_CODE = 10;
-    private FirebaseFirestore firestore;
+    private FirebaseFirestore mStore = FirebaseFirestore.getInstance();
     private FirebaseStorage storage;
     private Uri file;
+    private Flower newFlower;
+    StorageReference storageReference;
+
     private ImageView imageView;
     private String name;
-    StorageReference storageReference;
+    private Button btn_image, btn_upload;
+    private EditText text_name, text_feature, text_period, text_floriography, text_etc;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_up_load);
 
-        Button btn_image = (Button) findViewById(R.id.btn_image);
-        Button btn_upload = (Button) findViewById(R.id.btn_upload);
-        imageView = findViewById(R.id.imageView);
-        EditText textView = (EditText) findViewById(R.id.text_name);
+        Constructor();
+        set_clickListener();
+
+        newFlower = new Flower();
         storageReference = FirebaseStorage.getInstance().getReferenceFromUrl("gs://flowerbora-90ccf.appspot.com/");
 
-        btn_image.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.e("###", "btn_image clicked");
-                Intent intent = new Intent(Intent.ACTION_PICK);
-                intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
-                startActivityForResult(intent, GALLERY_CODE);
-            }
-        });
-
-        btn_upload.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                name = textView.getText().toString();
-                UpLoadPhoto();
-            }
-        });
     }
 
     @Override
@@ -85,17 +74,6 @@ public class UpLoadActivity extends AppCompatActivity {
 
     private void UpLoadPhoto() {
         StorageReference ref = storageReference.child("photo/" + name + ".jpg");
-        /*StorageReference storageReference = storage.getReference();
-        StorageReference riversReference = storageReference.child("photo/" + file + ".png");
-        UploadTask uploadTask = riversReference.putFile(file);
-
-        try {
-            InputStream in = getContentResolver().openInputStream(file);
-            Bitmap img = BitmapFactory.decodeStream(in);
-            in.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
 
         UploadTask uploadTask;
         uploadTask = ref.putFile(file);
@@ -108,7 +86,55 @@ public class UpLoadActivity extends AppCompatActivity {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 Log.e("###", "upload success");
+                Toast.makeText(UpLoadActivity.this, "업로드 성공", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btn_image:
+                Log.e("###", "btn_image clicked");
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
+                startActivityForResult(intent, GALLERY_CODE);
+                break;
+            case R.id.btn_upload:
+                name = text_name.getText().toString();
+
+                newFlower.setName(name);
+                newFlower.setFeature(text_feature.getText().toString());
+                newFlower.setPeriod(text_period.getText().toString());
+                newFlower.setFloriography(text_floriography.getText().toString());
+                newFlower.setEtc(text_etc.getText().toString());
+
+                mStore.collection("flower").document(name)
+                        .set(newFlower)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                Log.e("###", "flower 업로드 성공");
+                            }
+                        });
+                UpLoadPhoto();
+                break;
+        }
+    }
+
+    public void Constructor() {
+        btn_image = findViewById(R.id.btn_image);
+        btn_upload = findViewById(R.id.btn_upload);
+        imageView = findViewById(R.id.imageView);
+        text_name = findViewById(R.id.text_name);
+        text_feature = findViewById(R.id.text_feature);
+        text_floriography = findViewById(R.id.text_floriography);
+        text_period = findViewById(R.id.text_period);
+        text_etc = findViewById(R.id.text_etc);
+    }
+
+    public void set_clickListener() {
+        btn_image.setOnClickListener(this);
+        btn_upload.setOnClickListener(this);
     }
 }

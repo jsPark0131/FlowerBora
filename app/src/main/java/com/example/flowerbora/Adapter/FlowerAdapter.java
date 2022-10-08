@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -26,6 +27,7 @@ import java.util.List;
 public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.ViewHolder> {
     String TAG = "RecyclerViewAdapter";
 
+    public OnItemClickListener mListener = null;
     private List<Flower> flowers;
     private Context mContext = null;
     FirebaseStorage storage = FirebaseStorage.getInstance();
@@ -41,6 +43,18 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.ViewHolder
             name = itemView.findViewById(R.id.name);
             flower_image = itemView.findViewById(R.id.image);
 
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    int pos = getAdapterPosition();
+                    if (pos != RecyclerView.NO_POSITION) {
+                        if (mListener != null) {
+                            mListener.onItemClick(view, pos);
+                        }
+                    }
+                }
+            });
+
         }
     }
 
@@ -49,7 +63,6 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.ViewHolder
         this.flowers = flowers;
     }
 
-    @NonNull
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
@@ -84,5 +97,17 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.ViewHolder
     public int getItemCount() {
         if (flowers == null) return 0;
         return flowers.size();
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(View v, int position);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.mListener = listener;
+    }
+
+    public void setFlowers(List<Flower> flowers) {
+        this.flowers = flowers;
     }
 }

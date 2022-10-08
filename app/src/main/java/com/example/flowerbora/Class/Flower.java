@@ -1,11 +1,29 @@
 package com.example.flowerbora.Class;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 
-public class Flower {
+public class Flower implements Serializable {
     private String name;
     private String floriography;// 꽃말
-    private ArrayList<String> img_url;
+    private String feature;// 특징
+    private String period;
+    private String Etc;
+
+    public Flower() {
+        this.name = "";
+        this.floriography = "";
+        this.feature = "";
+        this.period = "";
+        this.Etc = "";
+    }
+
+    public Flower(String name, String floriography, String feature, String period, String Etc) {
+        this.name = name;
+        this.floriography = floriography;
+        this.feature = feature;
+        this.period = period;
+        this.Etc = Etc;
+    }
 
     public String getName() {
         return name;
@@ -23,11 +41,27 @@ public class Flower {
         this.floriography = floriography;
     }
 
-    public ArrayList<String> getImg_url() {
-        return img_url;
+    public String getFeature() {
+        return feature;
     }
 
-    public void setImg_url(ArrayList<String> img_url) {
-        this.img_url = img_url;
+    public void setFeature(String feature) {
+        this.feature = feature;
+    }
+
+    public String getPeriod() {
+        return period;
+    }
+
+    public void setPeriod(String period) {
+        this.period = period;
+    }
+
+    public String getEtc() {
+        return Etc;
+    }
+
+    public void setEtc(String etc) {
+        Etc = etc;
     }
 }

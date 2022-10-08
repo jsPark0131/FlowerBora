@@ -7,8 +7,9 @@
     tools:context=".FlowerListActivity">
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/flower_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/flower_recycler"/>
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
 </LinearLayout>
