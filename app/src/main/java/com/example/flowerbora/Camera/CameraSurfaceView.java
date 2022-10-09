@@ -8,6 +8,7 @@ import android.view.SurfaceView;
 
 import androidx.annotation.NonNull;
 
+// 카메라 미리보기 기능을 위한 인터페이스
 public class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     SurfaceHolder holder;
     Camera camera = null;

@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.ViewHolder> {
-    String TAG = "RecyclerViewAdapter";
 
     public OnItemClickListener mListener = null;
     private List<Flower> flowers;
@@ -76,7 +75,6 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.ViewHolder
         String flower_name = flowers.get(position).getName();
         viewholder.name.setText(flower_name);
 
-        //viewholder.flower_image.setPadding(0, 0, 0, 0);
         storageReference.child("photo/" + flower_name + ".jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
             @Override
             public void onSuccess(Uri uri) {
@@ -90,7 +88,6 @@ public class FlowerAdapter extends RecyclerView.Adapter<FlowerAdapter.ViewHolder
             }
         });
 
-        //else Log.e("###", "viewHolder.flower_image = null");
     }
 
     @Override

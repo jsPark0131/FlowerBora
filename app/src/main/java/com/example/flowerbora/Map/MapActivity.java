@@ -1,4 +1,4 @@
-package com.example.flowerbora;
+package com.example.flowerbora.Map;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -6,6 +6,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.content.DialogInterface;
@@ -16,18 +19,22 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.flowerbora.Adapter.FlowerAdapter;
+import com.example.flowerbora.Adapter.MapAdapter;
+import com.example.flowerbora.Class.Flower;
+import com.example.flowerbora.R;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.maps.CameraUpdate;
@@ -39,11 +46,17 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
-import org.checkerframework.checker.index.qual.LengthOf;
+import org.checkerframework.checker.units.qual.A;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -72,6 +85,16 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private View mLayout;// SnackBar 를 사용하기 위해서는 View 가 필요합니다.
 
+    private DrawerLayout drawerLayout;
+    private View drawerView;
+    private Button btn_close;
+    private ImageView btn_open;
+
+    private ArrayList<Flower> flowers;
+    private RecyclerView recyclerView;
+    FirebaseFirestore mStore = FirebaseFirestore.getInstance();
+    MapAdapter mapAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,6 +103,39 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_map);
 
         mLayout = findViewById(R.id.layout_map);
+
+        drawerLayout = findViewById(R.id.layout_map);
+        drawerView = findViewById(R.id.drawer);
+        btn_open = findViewById(R.id.btn_bar);
+        btn_close = findViewById(R.id.btn_close);
+
+       /* mapAdapter = new MapAdapter(getApplicationContext(), null);
+        recyclerView = findViewById(R.id.map_recycler);
+        recyclerView.setAdapter(mapAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));*/
+
+        recyclerView = findViewById(R.id.map_recycler);
+        upDateData();
+
+        btn_open.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawerLayout.openDrawer(drawerView);
+            }
+        });
+        btn_close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawerLayout.closeDrawers();
+            }
+        });
+        drawerLayout.setDrawerListener(listener);
+        drawerView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                return true;
+            }
+        });
 
         locationRequest = new LocationRequest().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY) // 실시간으로 사용자의 위치를 보여줌
                 .setInterval(UPDATE_INTERVAL_MS)
@@ -97,6 +153,49 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(MapActivity.this);
     }
+
+    public void upDateData() {
+        flowers = new ArrayList<>();
+        mStore.collection("flower").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task != null) {
+                    flowers.clear();
+                    Log.e("###", "쿼리갯수 : " + task.getResult().getDocuments().size());
+                    for (DocumentSnapshot snap : task.getResult().getDocuments()) {
+                        flowers.add(snap.toObject(Flower.class));
+                    }
+
+                    mapAdapter = new MapAdapter(MapActivity.this, flowers);
+                    recyclerView.setAdapter(mapAdapter);
+                    recyclerView.setLayoutManager(new LinearLayoutManager(MapActivity.this, RecyclerView.VERTICAL, false));
+                }
+
+            }
+        });
+    }
+
+    DrawerLayout.DrawerListener listener = new DrawerLayout.DrawerListener() { ///drawer 오픈됬을 때 작동함
+        @Override
+        public void onDrawerSlide(@NonNull @org.jetbrains.annotations.NotNull View drawerView, float slideOffset) {
+
+        }
+
+        @Override
+        public void onDrawerOpened(@NonNull @org.jetbrains.annotations.NotNull View drawerView) {
+            upDateData();
+        }
+
+        @Override
+        public void onDrawerClosed(@NonNull @org.jetbrains.annotations.NotNull View drawerView) {
+
+        }
+
+        @Override
+        public void onDrawerStateChanged(int newState) {
+
+        }
+    };
 
     // 지도 객체를 얻으려면 OnMapReadyCallBack 인터페이스를 구현한 클래스를 getMapAsync() 함수를 이용하여 등록.
     // 이렇게 하면 OnMapReady() 함수가 자동으로 호출되면서 매개변수로 GoogleMap 객체가 전달됨.
@@ -308,7 +407,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     // GPS 활성화를 위한 메소드들
-    private void showDialogForLocationServiceSetting(){
+    private void showDialogForLocationServiceSetting() {
         AlertDialog.Builder builder = new AlertDialog.Builder(MapActivity.this);
         builder.setTitle("위치 서비스 비활성화");
         builder.setMessage("앱을 사용하기 위해서는 위치 서비스가 필요합니다.\n위치 설정을 수정하겠습니까?");
@@ -333,11 +432,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        switch (requestCode){
+        switch (requestCode) {
             case GPS_ENABLE_REQUEST_CODE:
                 //사용자가 GPS 활성 시켰는지 검사
-                if (checkLocationServiceStatus()){
-                    if(checkLocationServiceStatus()){
+                if (checkLocationServiceStatus()) {
+                    if (checkLocationServiceStatus()) {
                         Log.e("###", "onActivityResult : GPS 활성화 되있음");
                         needRequest = true;
                         return;

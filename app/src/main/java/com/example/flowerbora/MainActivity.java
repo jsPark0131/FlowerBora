@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.flowerbora.Camera.CameraSurfaceView;
+import com.example.flowerbora.Map.MapActivity;
 import com.example.flowerbora.ml.Model;
 
 import org.tensorflow.lite.DataType;
