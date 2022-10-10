@@ -31,7 +31,12 @@ public class MapAdapter extends RecyclerView.Adapter<MapAdapter.ViewHolder> {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-
+                    int pos = getAdapterPosition();
+                    if (pos != RecyclerView.NO_POSITION) {
+                        if (mListener != null) {
+                            mListener.onItemClick(view, pos);
+                        }
+                    }
                 }
             });
         }
@@ -62,6 +67,10 @@ public class MapAdapter extends RecyclerView.Adapter<MapAdapter.ViewHolder> {
 
     public interface OnItemClickListener {
         void onItemClick(View v, int position);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.mListener = listener;
     }
 
     public void setFlowers(List<Flower> flowers) {

@@ -25,6 +25,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -32,6 +33,7 @@ import android.widget.Toast;
 import com.example.flowerbora.Adapter.FlowerAdapter;
 import com.example.flowerbora.Adapter.MapAdapter;
 import com.example.flowerbora.Class.Flower;
+import com.example.flowerbora.Class.FlowerList;
 import com.example.flowerbora.R;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
@@ -60,7 +62,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, MapAdapter.OnItemClickListener, AdapterView.OnItemSelectedListener {
     private GoogleMap mMap;
     private Marker currentMarker = null;
 
@@ -92,8 +94,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private ArrayList<Flower> flowers;
     private RecyclerView recyclerView;
+    FlowerList flowerList = FlowerList.getInstance();
     FirebaseFirestore mStore = FirebaseFirestore.getInstance();
     MapAdapter mapAdapter;
+    Flower select_data;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,11 +112,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         drawerView = findViewById(R.id.drawer);
         btn_open = findViewById(R.id.btn_bar);
         btn_close = findViewById(R.id.btn_close);
-
-       /* mapAdapter = new MapAdapter(getApplicationContext(), null);
-        recyclerView = findViewById(R.id.map_recycler);
-        recyclerView.setAdapter(mapAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));*/
 
         recyclerView = findViewById(R.id.map_recycler);
         upDateData();
@@ -166,8 +165,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         flowers.add(snap.toObject(Flower.class));
                     }
 
+                    flowerList.setFlowers(flowers);
                     mapAdapter = new MapAdapter(MapActivity.this, flowers);
                     recyclerView.setAdapter(mapAdapter);
+                    mapAdapter.setOnItemClickListener(MapActivity.this);
                     recyclerView.setLayoutManager(new LinearLayoutManager(MapActivity.this, RecyclerView.VERTICAL, false));
                 }
 
@@ -237,6 +238,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             @Override
             public void onMapClick(@NonNull LatLng latLng) {
                 Log.e("###", "onMapClick : ");
+                Log.e("###", String.valueOf(latLng.latitude));
+                Log.e("###", String.valueOf(latLng.longitude));
             }
         });
     }
@@ -316,41 +319,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         super.onPointerCaptureChanged(hasCapture);
     }
 
-    public void setCurrentLocation(Location location, String markerTitle, String markerSnippet) {
-        if (currentMarker != null) currentMarker.remove();
-
-        LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(currentLatLng);
-        markerOptions.title(markerTitle);
-        markerOptions.snippet(markerSnippet);
-        markerOptions.draggable(true);
-
-        currentMarker = mMap.addMarker(markerOptions);
-
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(currentLatLng);
-        //mMap.moveCamera(cameraUpdate);
-    }
-
     public void setDefaultLocation() {
         LatLng DEFAULT_LOCATION = new LatLng(35.887245, 128.6117684);
 
         Log.e("###", "3. setDefaultLocation Done");
-
-        String markerTitle = "위치정보 가져올 수 없음";
-        String markerSnippet = "위치 퍼미션과 GPS 활성 여부를 확인하세요";
-
-        if (currentMarker != null) currentMarker.remove();
-
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(DEFAULT_LOCATION);
-        markerOptions.title(markerTitle);
-        markerOptions.snippet(markerSnippet);
-        markerOptions.draggable(true);
-
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-        currentMarker = mMap.addMarker(markerOptions);
 
         // 다른 모든 속성을 유지하면서 카메라의 위도, 경도, 확대/축소 수준을 변경하는 CameraUpdate 를 제공
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, 15);
@@ -444,5 +416,46 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 }
                 break;
         }
+    }
+
+    @Override
+    public void onItemClick(View v, int position) {
+        select_data = flowerList.getFlowers().get(position);
+        List<Double> p = select_data.getLatlng_double();
+        if (p.size() == 0) {
+            Log.e("###", "위치정보 추가 필요");
+        } else {
+            if (currentMarker != null) {
+                currentMarker.remove();
+                mMap.clear();
+            }
+            for (int i = 0; i < p.size(); i += 2) {
+                LatLng ret = new LatLng(p.get(i), p.get(i + 1));
+
+                MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.position(ret);
+                markerOptions.title(select_data.getName());
+                markerOptions.draggable(true);
+
+                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+
+                currentMarker = mMap.addMarker(markerOptions);
+            }
+        }
+        Log.e("###", "clicked position : " + position);
+        drawerLayout.closeDrawers();
+
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+        mapAdapter.setFlowers(flowerList.getFlowers());
+        mapAdapter.notifyDataSetChanged();
+        recyclerView.setAdapter(mapAdapter);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+
     }
 }

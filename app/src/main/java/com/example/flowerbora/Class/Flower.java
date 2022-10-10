@@ -1,6 +1,7 @@
 package com.example.flowerbora.Class;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class Flower implements Serializable {
     private String name;
@@ -8,6 +9,7 @@ public class Flower implements Serializable {
     private String feature;// 특징
     private String period;
     private String Etc;
+    private List<Double> latlng_double;
 
     public Flower() {
         this.name = "";
@@ -17,12 +19,21 @@ public class Flower implements Serializable {
         this.Etc = "";
     }
 
-    public Flower(String name, String floriography, String feature, String period, String Etc) {
+    public Flower(String name, String floriography, String feature, String period, String Etc, List<Double> latlng_doube) {
         this.name = name;
         this.floriography = floriography;
         this.feature = feature;
         this.period = period;
         this.Etc = Etc;
+        this.latlng_double = latlng_doube;
+    }
+
+    public List<Double> getLatlng_double() {
+        return latlng_double;
+    }
+
+    public void setLatlng_double(List<Double> latlng_double) {
+        this.latlng_double = latlng_double;
     }
 
     public String getName() {
