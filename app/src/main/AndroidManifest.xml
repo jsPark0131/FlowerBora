@@ -35,7 +35,7 @@
             android:name=".Map.MapActivity"
             android:exported="false" />
         <activity
-            android:name=".ResultActivity"
+            android:name=".Developer.ResultActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

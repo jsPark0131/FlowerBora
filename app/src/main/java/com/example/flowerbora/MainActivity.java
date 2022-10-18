@@ -8,19 +8,31 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
 import android.hardware.Camera;
 import android.media.ThumbnailUtils;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.flowerbora.Camera.CameraSurfaceView;
+import com.example.flowerbora.Class.Flower;
+import com.example.flowerbora.Developer.ResultActivity;
 import com.example.flowerbora.Developer.UpLoadActivity;
 import com.example.flowerbora.Map.MapActivity;
 import com.example.flowerbora.ml.Model;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
 
 import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
@@ -32,7 +44,12 @@ import java.nio.ByteOrder;
 public class MainActivity extends AppCompatActivity {
 
     CameraSurfaceView surfaceView;
-    int imageSize = 224;
+    int imageSize = 250;
+
+    FirebaseFirestore mStore = FirebaseFirestore.getInstance();
+    FirebaseStorage storage = FirebaseStorage.getInstance();
+    private Flower flowerData = new Flower();
+    private String flowerName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
 
         surfaceView = findViewById(R.id.surfaceView);
 
-        Button button = findViewById(R.id.button);
+        ImageView button = findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -50,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Button map = findViewById(R.id.map);
+        LinearLayout map = findViewById(R.id.map);
         map.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -68,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Button list = findViewById(R.id.btn_list);
+        LinearLayout list = findViewById(R.id.btn_list);
         list.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -136,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
             Model model = Model.newInstance(getApplicationContext());
 
             // Creates inputs for reference.
-            TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{1, 224, 224, 3}, DataType.FLOAT32);
+            TensorBuffer inputFeature0 = TensorBuffer.createFixedSize(new int[]{1, 250, 250, 3}, DataType.FLOAT32);
             ByteBuffer byteBuffer = ByteBuffer.allocateDirect(4 * imageSize * imageSize * 3);
             byteBuffer.order(ByteOrder.nativeOrder());
 
@@ -172,12 +189,28 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            Intent intent = new Intent(MainActivity.this, ResultActivity.class);
-            intent.putExtra("confidence", confidences);
+            String[] classes = {"아카시아", "진달래", "벚꽃", "감국", "배롱나무꽃", "개나리", "라일락", "목련", "감꽃", "장미"};
+            flowerName = classes[maxPos];
+
+            Log.e("###", flowerName);
+
+            Intent intent = new Intent(MainActivity.this, FlowerExplain.class);
+            mStore.collection("flower").whereEqualTo("name", flowerName).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    flowerData = task.getResult().getDocuments().get(0).toObject(Flower.class);
+
+                    intent.putExtra("select_data", flowerData);
+                    model.close();
+                    startActivity(intent);
+                }
+            });
+
+            /*Intent intent = new Intent(MainActivity.this, ResultActivity.class);
+            intent.putExtra("confidence", confidences);*/
 
             // Releases model resources if no longer used.
-            model.close();
-            startActivity(intent);
+
         } catch (IOException e) {
             // TODO Handle the exception
         }
