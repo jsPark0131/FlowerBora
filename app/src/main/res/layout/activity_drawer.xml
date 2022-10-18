@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer"
     android:layout_width="150dp"
     android:layout_height="match_parent"
     android:layout_gravity="start"
-    android:gravity="center"
-    android:orientation="vertical"
     android:background="#03A9F4"
-    android:id="@+id/drawer">
+    android:gravity="center"
+    android:orientation="vertical">
 
     <Button
+        android:id="@+id/btn_close"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/btn_close"
-        android:text="메뉴 닫기"/>
+        android:text="메뉴 닫기" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/map_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
 </LinearLayout>

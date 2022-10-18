@@ -59,7 +59,7 @@ public class ResultActivity extends AppCompatActivity {
         }
         confidence.setText(s);
 
-        String path = "photo/"+classes[maxPos]+".jpg";
+        String path = "photo/" + classes[maxPos] + ".jpg";
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference storageReference = storage.getReference();
         storageReference.child(path).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {

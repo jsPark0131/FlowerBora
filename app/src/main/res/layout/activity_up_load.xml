@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:gravity="center"
+    android:orientation="vertical"
     tools:context=".UpLoadActivity">
 
     <ScrollView
@@ -15,59 +15,58 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:minHeight="1000dp"
-            android:orientation="vertical"
-            android:gravity="center">
+            android:orientation="vertical">
 
             <ImageView
+                android:id="@+id/imageView"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/imageView"/>
+                android:layout_height="wrap_content" />
 
             <Button
+                android:id="@+id/btn_image"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="이미지 불러오기"
-                android:id="@+id/btn_image"/>
+                android:text="이미지 불러오기" />
 
             <EditText
+                android:id="@+id/text_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="name"
-                android:id="@+id/text_name"/>
+                android:hint="name" />
 
             <EditText
+                android:id="@+id/text_feature"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="feature"
-                android:id="@+id/text_feature"/>
+                android:hint="feature" />
 
             <EditText
+                android:id="@+id/text_period"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="period"
-                android:id="@+id/text_period"/>
+                android:hint="period" />
 
             <EditText
+                android:id="@+id/text_floriography"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="floriography"
-                android:id="@+id/text_floriography"/>
+                android:hint="floriography" />
 
             <EditText
+                android:id="@+id/text_etc"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="etc"
-                android:id="@+id/text_etc"/>
+                android:hint="etc" />
 
             <Button
+                android:id="@+id/btn_upload"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="upload"
-                android:id="@+id/btn_upload"/>
+                android:text="upload" />
         </LinearLayout>
     </ScrollView>
-
 
 
 </LinearLayout>

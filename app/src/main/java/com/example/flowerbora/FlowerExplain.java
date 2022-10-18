@@ -12,13 +12,22 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.flowerbora.Class.Flower;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-public class FlowerExplain extends AppCompatActivity {
+import java.util.List;
+
+public class FlowerExplain extends AppCompatActivity implements OnMapReadyCallback {
 
     private FirebaseFirestore mstore = FirebaseFirestore.getInstance();
     Flower select_data;
@@ -27,10 +36,14 @@ public class FlowerExplain extends AppCompatActivity {
     private TextView text_name, text_floriography, text_feature, text_period, text_Etc;
     private ImageView imageView;
 
+    private GoogleMap mMap;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_flower_explain);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
 
         Intent intent = getIntent();
         select_data = (Flower) intent.getSerializableExtra("select_data");
@@ -75,5 +88,30 @@ public class FlowerExplain extends AppCompatActivity {
         text_Etc = findViewById(R.id.text_Etc);
 
         imageView = findViewById(R.id.image);
+    }
+
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        LatLng DEFAULT_LOCATION = new LatLng(35.889950783370985, 128.61165940761563);
+
+        mMap = googleMap;
+        List<Double> p = select_data.getLatlng_double();
+        if (p.size() == 0) {
+            Log.e("###", "위치정보 추가 필요");
+        } else {
+            for (int i = 0; i < p.size(); i += 2) {
+                LatLng ret = new LatLng(p.get(i), p.get(i + 1));
+
+                MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.position(ret);
+                markerOptions.title(select_data.getName());
+                markerOptions.draggable(true);
+
+                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+
+                mMap.addMarker(markerOptions);
+            }
+        }
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, 14.7f));
     }
 }

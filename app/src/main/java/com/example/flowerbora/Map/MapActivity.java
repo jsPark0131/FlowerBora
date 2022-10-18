@@ -18,6 +18,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -28,12 +29,16 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.flowerbora.Adapter.FlowerAdapter;
 import com.example.flowerbora.Adapter.MapAdapter;
 import com.example.flowerbora.Class.Flower;
 import com.example.flowerbora.Class.FlowerList;
+import com.example.flowerbora.FlowerExplain;
 import com.example.flowerbora.R;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
@@ -49,11 +54,15 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import org.checkerframework.checker.units.qual.A;
 
@@ -62,7 +71,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, MapAdapter.OnItemClickListener, AdapterView.OnItemSelectedListener {
+public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, MapAdapter.OnItemClickListener, AdapterView.OnItemSelectedListener, GoogleMap.OnMarkerClickListener {
     private GoogleMap mMap;
     private Marker currentMarker = null;
 
@@ -96,8 +105,16 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private RecyclerView recyclerView;
     FlowerList flowerList = FlowerList.getInstance();
     FirebaseFirestore mStore = FirebaseFirestore.getInstance();
+    FirebaseStorage storage = FirebaseStorage.getInstance();
+    StorageReference storageReference = storage.getReference();
     MapAdapter mapAdapter;
     Flower select_data;
+
+    private String flowerName;
+    private LinearLayout preview;
+    private ImageView pre_image;
+    private TextView pre_name, pre_period, position;
+    private Flower flowerData = new Flower();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,6 +129,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         drawerView = findViewById(R.id.drawer);
         btn_open = findViewById(R.id.btn_bar);
         btn_close = findViewById(R.id.btn_close);
+        preview = findViewById(R.id.preview);
+        pre_image = findViewById(R.id.pre_image);
+        pre_name = findViewById(R.id.pre_name);
+        pre_period = findViewById(R.id.pre_period);
+        position = findViewById(R.id.position);
 
         recyclerView = findViewById(R.id.map_recycler);
         upDateData();
@@ -119,6 +141,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         btn_open.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                setPreviewPosDown();
                 drawerLayout.openDrawer(drawerView);
             }
         });
@@ -133,6 +156,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 return true;
+            }
+        });
+
+        preview.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), FlowerExplain.class);
+                intent.putExtra("select_data", flowerData);
+                startActivity(intent);
             }
         });
 
@@ -151,6 +183,111 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         // 프래그먼트 정적으로 추가
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(MapActivity.this);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case GPS_ENABLE_REQUEST_CODE:
+                //사용자가 GPS 활성 시켰는지 검사
+                if (checkLocationServiceStatus()) {
+                    if (checkLocationServiceStatus()) {
+                        Log.e("###", "onActivityResult : GPS 활성화 되있음");
+                        needRequest = true;
+                        return;
+                    }
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void onItemClick(View v, int position) {
+        select_data = flowerList.getFlowers().get(position);
+        List<Double> p = select_data.getLatlng_double();
+        if (p.size() == 0) {
+            Log.e("###", "위치정보 추가 필요");
+        } else {
+            if (currentMarker != null) {
+                currentMarker.remove();
+                mMap.clear();
+            }
+            for (int i = 0; i < p.size(); i += 2) {
+                LatLng ret = new LatLng(p.get(i), p.get(i + 1));
+
+                MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.position(ret);
+                markerOptions.title(select_data.getName());
+                markerOptions.draggable(true);
+
+                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+
+                currentMarker = mMap.addMarker(markerOptions);
+            }
+        }
+        Log.e("###", "clicked position : " + position);
+        drawerLayout.closeDrawers();
+
+    }
+
+    @Override
+    public boolean onMarkerClick(@NonNull Marker marker) {
+        Log.e("###", "onMarkerClicked");
+        flowerName = marker.getTitle();
+
+        mStore.collection("flower").whereEqualTo("name", flowerName).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                flowerData = task.getResult().getDocuments().get(0).toObject(Flower.class);
+
+                pre_name.setText(flowerName);
+                pre_period.setText(flowerData.getPeriod());
+
+                storageReference.child("photo/" + flowerName + ".jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        Glide.with(MapActivity.this).load(uri).into(pre_image);
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("###", "이미지 불러오기 실패");
+                    }
+                });
+
+                setPreviewPosUp();
+            }
+        });
+        return false;
+    }
+
+    void setPreviewPosUp() {
+        int gap = position.getBottom() - preview.getBottom();
+        Log.e(TAG, "setDetailPostUp : 실행" + (gap));
+
+        pre_image.setImageResource(R.drawable.flower);
+        preview.animate().translationY(gap);
+        position.animate().translationY(gap);
+    }
+
+    void setPreviewPosDown() {
+        Log.e(TAG, "setDetailPostDown : 실행");
+        preview.animate().translationY(0);
+        position.animate().translationY(0);
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+        mapAdapter.setFlowers(flowerList.getFlowers());
+        mapAdapter.notifyDataSetChanged();
+        recyclerView.setAdapter(mapAdapter);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+
     }
 
     public void upDateData() {
@@ -242,6 +379,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 Log.e("###", String.valueOf(latLng.longitude));
             }
         });
+
+
+        mMap.setOnMarkerClickListener(this);
     }
 
     private void startLocationUpdates() {
@@ -281,31 +421,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         if (mFusedLocationClient != null) {
             Log.e("###", "onStop : call stopLocationUpdates");
-        }
-    }
-
-    public String getCurrentAddress(LatLng latLng) {
-        // 지오코더... GPS 를 주소로 변환
-        Geocoder geocoder = new Geocoder(MapActivity.this, Locale.getDefault());
-
-        List<Address> addresses;
-
-        try {
-            addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
-        } catch (IOException ioException) {
-            Toast.makeText(MapActivity.this, "지오코더 서비스 사용불가", Toast.LENGTH_SHORT).show();
-            return "지오코더 서비스 사용불가";
-        } catch (IllegalArgumentException illegalArgumentException) {
-            Toast.makeText(MapActivity.this, "잘못된 GPS 좌표", Toast.LENGTH_SHORT).show();
-            return "잘못된 GPS 좌표";
-        }
-
-        if (addresses == null || addresses.size() == 0) {
-            Toast.makeText(MapActivity.this, "주소 미발견", Toast.LENGTH_SHORT).show();
-            return "주소 미발견";
-        } else {
-            Address address = addresses.get(0);
-            return address.getAddressLine(0).toString();
         }
     }
 
@@ -400,62 +515,5 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         builder.create().show();
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
 
-        switch (requestCode) {
-            case GPS_ENABLE_REQUEST_CODE:
-                //사용자가 GPS 활성 시켰는지 검사
-                if (checkLocationServiceStatus()) {
-                    if (checkLocationServiceStatus()) {
-                        Log.e("###", "onActivityResult : GPS 활성화 되있음");
-                        needRequest = true;
-                        return;
-                    }
-                }
-                break;
-        }
-    }
-
-    @Override
-    public void onItemClick(View v, int position) {
-        select_data = flowerList.getFlowers().get(position);
-        List<Double> p = select_data.getLatlng_double();
-        if (p.size() == 0) {
-            Log.e("###", "위치정보 추가 필요");
-        } else {
-            if (currentMarker != null) {
-                currentMarker.remove();
-                mMap.clear();
-            }
-            for (int i = 0; i < p.size(); i += 2) {
-                LatLng ret = new LatLng(p.get(i), p.get(i + 1));
-
-                MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.position(ret);
-                markerOptions.title(select_data.getName());
-                markerOptions.draggable(true);
-
-                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-
-                currentMarker = mMap.addMarker(markerOptions);
-            }
-        }
-        Log.e("###", "clicked position : " + position);
-        drawerLayout.closeDrawers();
-
-    }
-
-    @Override
-    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-        mapAdapter.setFlowers(flowerList.getFlowers());
-        mapAdapter.notifyDataSetChanged();
-        recyclerView.setAdapter(mapAdapter);
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> adapterView) {
-
-    }
 }
