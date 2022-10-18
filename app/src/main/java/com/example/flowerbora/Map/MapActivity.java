@@ -14,15 +14,12 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -31,10 +28,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.example.flowerbora.Adapter.FlowerAdapter;
 import com.example.flowerbora.Adapter.MapAdapter;
 import com.example.flowerbora.Class.Flower;
 import com.example.flowerbora.Class.FlowerList;
@@ -64,12 +59,8 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import org.checkerframework.checker.units.qual.A;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, MapAdapter.OnItemClickListener, AdapterView.OnItemSelectedListener, GoogleMap.OnMarkerClickListener {
     private GoogleMap mMap;
@@ -267,7 +258,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         int gap = position.getBottom() - preview.getBottom();
         Log.e(TAG, "setDetailPostUp : 실행" + (gap));
 
-        pre_image.setImageResource(R.drawable.flower);
+        pre_image.setImageResource(R.drawable.ic_flower);
         preview.animate().translationY(gap);
         position.animate().translationY(gap);
     }

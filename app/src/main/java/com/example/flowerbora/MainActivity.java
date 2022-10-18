@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.flowerbora.Camera.CameraSurfaceView;
+import com.example.flowerbora.Developer.UpLoadActivity;
 import com.example.flowerbora.Map.MapActivity;
 import com.example.flowerbora.ml.Model;
 
@@ -31,7 +32,6 @@ import java.nio.ByteOrder;
 public class MainActivity extends AppCompatActivity {
 
     CameraSurfaceView surfaceView;
-    ImageView imageView;
     int imageSize = 224;
 
     @Override
@@ -40,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         surfaceView = findViewById(R.id.surfaceView);
-        imageView = findViewById(R.id.imageView);
 
         Button button = findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
@@ -121,7 +120,6 @@ public class MainActivity extends AppCompatActivity {
                 matrix.postRotate(90);
 
                 Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
-                imageView.setImageDrawable(new BitmapDrawable(resizedBitmap));//이미지뷰에 사진 보여주기
 
                 int dimension = Math.min(resizedBitmap.getWidth(), resizedBitmap.getHeight());
                 resizedBitmap = ThumbnailUtils.extractThumbnail(resizedBitmap, dimension, dimension);
@@ -176,7 +174,6 @@ public class MainActivity extends AppCompatActivity {
 
             Intent intent = new Intent(MainActivity.this, ResultActivity.class);
             intent.putExtra("confidence", confidences);
-            //intent.putExtra("image", image);
 
             // Releases model resources if no longer used.
             model.close();

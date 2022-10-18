@@ -52,11 +52,4 @@
 
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="370sp"
-        android:layout_height="370sp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="10sp" />
-
 </LinearLayout>

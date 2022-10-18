@@ -64,7 +64,7 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:src="@drawable/flower"
+                android:src="@drawable/ic_flower"
                 android:scaleType="centerCrop"
                 android:id="@+id/pre_image"
                 android:elevation="2dp"
