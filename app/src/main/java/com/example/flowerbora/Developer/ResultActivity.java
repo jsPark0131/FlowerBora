@@ -42,7 +42,7 @@ public class ResultActivity extends AppCompatActivity {
                 maxPos = i;
             }
         }
-        String[] classes = {"아카시아", "진달래", "벚꽃", "감국", "배롱나무꽃", "개나리", "라일락", "목련", "감꽃", "장미"};
+        String[] classes = {"아카시아", "진달래꽃", "벚꽃", "감국", "배롱나무꽃", "개나리꽃", "라일락", "목련", "감꽃", "장미"};
         result.setText(classes[maxPos]);
         String s = "";
         for (int i = 0; i < classes.length; i++) {

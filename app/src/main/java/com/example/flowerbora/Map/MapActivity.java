@@ -119,7 +119,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         drawerLayout = findViewById(R.id.layout_map);
         drawerView = findViewById(R.id.drawer);
         btn_open = findViewById(R.id.btn_bar);
-        btn_close = findViewById(R.id.btn_close);
         preview = findViewById(R.id.preview);
         pre_image = findViewById(R.id.pre_image);
         pre_name = findViewById(R.id.pre_name);
@@ -134,12 +133,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             public void onClick(View view) {
                 setPreviewPosDown();
                 drawerLayout.openDrawer(drawerView);
-            }
-        });
-        btn_close.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                drawerLayout.closeDrawers();
             }
         });
         drawerLayout.setDrawerListener(listener);
@@ -220,7 +213,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
         Log.e("###", "clicked position : " + position);
         drawerLayout.closeDrawers();
-
+        setDefaultLocation();
     }
 
     @Override
