@@ -2,7 +2,12 @@ package com.example.flowerbora;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
+import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -45,11 +50,13 @@ public class MainActivity extends AppCompatActivity {
 
     CameraSurfaceView surfaceView;
     int imageSize = 250;
+    static final int PERMISSION_REQUEST_CODE = 0X00001;
 
     FirebaseFirestore mStore = FirebaseFirestore.getInstance();
     FirebaseStorage storage = FirebaseStorage.getInstance();
     private Flower flowerData = new Flower();
     private String flowerName;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,30 +65,32 @@ public class MainActivity extends AppCompatActivity {
 
         surfaceView = findViewById(R.id.surfaceView);
 
+        onCheckCameraPermission();
         ImageView button = findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //카메라 사진 캡쳐
-                capture();
+                if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                    capture();
+                } else {
+                    onCheckCameraPermission();
+                }
             }
         });
 
+        onCheckLocationPermission();
         LinearLayout map = findViewById(R.id.map);
         map.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, MapActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        Button upload = findViewById(R.id.btn_upload);
-        upload.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, UpLoadActivity.class);
-                startActivity(intent);
+                if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                        && ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    Intent intent = new Intent(MainActivity.this, MapActivity.class);
+                    startActivity(intent);
+                } else {
+                    onCheckLocationPermission();
+                }
             }
         });
 
@@ -95,20 +104,57 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    public void onCheckCameraPermission() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+                Toast.makeText(this, "기능을 위해서는 권한을 설정해야 합니다", Toast.LENGTH_LONG).show();
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 101);
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 101);
+            }
+        }
+    }
+
+    public void onCheckLocationPermission() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                Toast.makeText(this, "기능을 위해서는 권한을 설정해야 합니다", Toast.LENGTH_LONG).show();
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_CODE);
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_CODE);
+            }
+        }
+    }
+
     @Override   //카메라 권한 함수
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case 101:
+                Log.e("###", "onRequestPermission");
                 if (grantResults.length > 0) {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                        Toast.makeText(this, "카메라 권한 사용자가 승인함", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "카메라 권한 사용자가 승인함", Toast.LENGTH_LONG).show();PackageManager packageManager = getPackageManager();
+                        Intent intent = packageManager.getLaunchIntentForPackage(getPackageName());
+                        ComponentName componentName = intent.getComponent();
+                        Intent mainIntent = Intent.makeRestartActivityTask(componentName);
+                        startActivity(mainIntent);
+                        System.exit(0);
                     } else if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
                         Toast.makeText(this, "카메라 권한 사용자가 허용하지 않음.", Toast.LENGTH_LONG).show();
                     } else {
                         Toast.makeText(this, "수신권한 부여받지 못함.", Toast.LENGTH_LONG).show();
                     }
                 }
+                break;
+            case PERMISSION_REQUEST_CODE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "권한 승인함", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(this, "권한 부여받지 못함.", Toast.LENGTH_LONG).show();
+                }
+                break;
         }
     }
 

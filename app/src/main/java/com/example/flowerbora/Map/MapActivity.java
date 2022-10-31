@@ -386,7 +386,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 mMap.setMyLocationEnabled(true);
         }
     }
-
     @Override
     protected void onStart() {
         super.onStart();
