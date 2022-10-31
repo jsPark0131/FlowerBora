@@ -135,7 +135,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("###", "onRequestPermission");
                 if (grantResults.length > 0) {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                        Toast.makeText(this, "카메라 권한 사용자가 승인함", Toast.LENGTH_LONG).show();PackageManager packageManager = getPackageManager();
+                        Toast.makeText(this, "카메라 권한 사용자가 승인함", Toast.LENGTH_LONG).show();
+                        PackageManager packageManager = getPackageManager();
                         Intent intent = packageManager.getLaunchIntentForPackage(getPackageName());
                         ComponentName componentName = intent.getComponent();
                         Intent mainIntent = Intent.makeRestartActivityTask(componentName);

@@ -364,7 +364,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
         });
 
-
         mMap.setOnMarkerClickListener(this);
     }
 
@@ -386,13 +385,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 mMap.setMyLocationEnabled(true);
         }
     }
+
     @Override
     protected void onStart() {
         super.onStart();
 
         if (checkPermission()) {
             Log.e("###", "1. onStart : call mFusedLocationClient.requestLocationUpdates");
-
             if (mMap != null)
                 mMap.setMyLocationEnabled(true);
         }

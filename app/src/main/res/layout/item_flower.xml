@@ -2,8 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center"
     android:background="#FFB19C"
+    android:gravity="center"
     android:orientation="vertical">
 
     <LinearLayout
@@ -13,7 +13,7 @@
         <View
             android:layout_width="1dp"
             android:layout_height="0dp"
-            android:layout_weight="1"/>
+            android:layout_weight="1" />
 
         <ImageView
             android:id="@+id/image"
@@ -26,22 +26,22 @@
         <View
             android:layout_width="1dp"
             android:layout_height="0dp"
-            android:layout_weight="1"/>
+            android:layout_weight="1" />
     </LinearLayout>
 
     <TextView
-        android:layout_marginBottom="20dp"
         android:id="@+id/name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
         android:text="꽃 이름"
-        android:textSize="20sp"
         android:textAlignment="center"
-        android:textColor="@color/black" />
+        android:textColor="@color/black"
+        android:textSize="20sp" />
 
     <View
         android:layout_width="130dp"
         android:layout_height="1dp"
-        android:background="#E5E5E5"/>
+        android:background="#E5E5E5" />
 
 </LinearLayout>
