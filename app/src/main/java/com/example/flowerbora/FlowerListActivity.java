@@ -2,6 +2,7 @@ package com.example.flowerbora;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -42,7 +43,7 @@ public class FlowerListActivity extends AppCompatActivity implements FlowerAdapt
         recyclerView = findViewById(R.id.flower_recycler);
         recyclerView.setAdapter(flowerAdapter);
         flowerAdapter.setOnItemClickListener(this);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         upDateData();
     }
 
