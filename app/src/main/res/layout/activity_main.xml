@@ -112,12 +112,17 @@
     </FrameLayout>
 
     <LinearLayout
+        android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_margin="10dp"
         android:gravity="center"
+        app:layout_constraintVertical_bias="0.5"
+        app:layout_constraintVertical_weight="75"
         android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@+id/layout_frame">
+        app:layout_constraintBottom_toTopOf="@+id/map"
+        app:layout_constraintTop_toBottomOf="@+id/layout_frame"
+        tools:layout_editor_absoluteX="10dp">
 
         <ImageView
             android:id="@+id/button"
@@ -138,11 +143,14 @@
     <LinearLayout
         android:id="@+id/map"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="0dp"
         android:background="#AA614D"
         android:gravity="center"
+        app:layout_constraintVertical_bias="0.5"
+        app:layout_constraintVertical_weight="60"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
 
         <ImageView
             android:layout_width="60dp"
