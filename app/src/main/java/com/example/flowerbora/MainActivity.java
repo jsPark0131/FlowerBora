@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -19,6 +20,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -57,11 +60,17 @@ public class MainActivity extends AppCompatActivity {
     private Flower flowerData = new Flower();
     private String flowerName;
 
+    ProgressDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        dialog = new ProgressDialog(MainActivity.this);
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.setMessage("결과를 확인하고 있습니다.");
 
         surfaceView = findViewById(R.id.surfaceView);
 
@@ -71,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //카메라 사진 캡쳐
+                dialog.show();
                 if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                     capture();
                 } else {
@@ -250,6 +260,7 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra("select_data", flowerData);
                     model.close();
                     startActivity(intent);
+                    dialog.dismiss();
                 }
             });
 

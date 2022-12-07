@@ -30,6 +30,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.example.flowerbora.Adapter.FlowerAdapter;
 import com.example.flowerbora.Adapter.MapAdapter;
 import com.example.flowerbora.Class.Flower;
 import com.example.flowerbora.Class.FlowerList;
@@ -126,6 +127,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         position = findViewById(R.id.position);
 
         recyclerView = findViewById(R.id.map_recycler);
+        mapAdapter= new MapAdapter(getApplicationContext(), null);
+        recyclerView.setAdapter(mapAdapter);
+        mapAdapter.setOnItemClickListener(this);
+        recyclerView.setLayoutManager(new LinearLayoutManager(MapActivity.this, RecyclerView.VERTICAL, false));
+
         upDateData();
 
         btn_open.setOnClickListener(new View.OnClickListener() {
@@ -214,12 +220,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         Log.e("###", "clicked position : " + position);
         drawerLayout.closeDrawers();
         setDefaultLocation();
-    }
 
-    @Override
-    public boolean onMarkerClick(@NonNull Marker marker) {
-        Log.e("###", "onMarkerClicked");
-        flowerName = marker.getTitle();
+        flowerName = select_data.getName();
 
         mStore.collection("flower").whereEqualTo("name", flowerName).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
@@ -244,6 +246,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 setPreviewPosUp();
             }
         });
+    }
+
+    @Override
+    public boolean onMarkerClick(@NonNull Marker marker) {
+        Log.e("###", "onMarkerClicked");
+
         return false;
     }
 
@@ -287,11 +295,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     }
 
                     flowerList.setFlowers(flowers);
-                    mapAdapter = new MapAdapter(MapActivity.this, flowers);
-                    recyclerView.setAdapter(mapAdapter);
-                    mapAdapter.setOnItemClickListener(MapActivity.this);
-                    recyclerView.setLayoutManager(new LinearLayoutManager(MapActivity.this, RecyclerView.VERTICAL, false));
-                }
+                    mapAdapter.setFlowers(flowerList.getFlowers());
+                    mapAdapter.notifyDataSetChanged();
+                    }
 
             }
         });
